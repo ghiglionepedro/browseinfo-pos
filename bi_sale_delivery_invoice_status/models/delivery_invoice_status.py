@@ -79,7 +79,12 @@ class inherit_invoicing(models.Model):
 								else:
 									amount += record.amount_total
 
-						if amount == sale.amount_total:
+						pos_orders = self.env['pos.order'].search([('sale_order_id', '=', sale.id), ('state', 'in', ['paid', 'done', 'invoiced'])])
+
+						for pos in pos_orders:
+							amount += pos.amount_total
+
+						if abs(amount - sale.amount_total) <= 0.05:  # Acepta una diferencia de hasta 5 centavos
 							sale.write({
 								"is_partially_paid": False,
 								"is_fully_paid": True
